@@ -38,7 +38,7 @@ class FirestoreSlideshowState extends State<Home> {
     PickedFile pickedFile;
     // Let user select photo from gallery
     if (gallery) {
-      pickedFile = await picker.getVideo(
+      pickedFile = await picker.getImage(
         source: ImageSource.gallery,
       );
     }
@@ -70,7 +70,7 @@ class FirestoreSlideshowState extends State<Home> {
     Reference storageReference = FirebaseStorage.instance
         .ref()
         .child('images/${_image.path.split('/').last}');
-    await storageReference.putFile(_image, SettableMetadata(contentType: 'video/mp4'));
+    await storageReference.putFile(_image);
     print('File Uploaded');
     String returnURL;
     await storageReference.getDownloadURL().then((fileURL) {
