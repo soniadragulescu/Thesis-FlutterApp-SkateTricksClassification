@@ -31,7 +31,7 @@ class _FirstTimeState extends State<FirstTime> {
                     MaterialPageRoute(builder: (context) => NewUser()));
               },
               child: Text(
-                'Sing up',
+                'Sign up',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white,

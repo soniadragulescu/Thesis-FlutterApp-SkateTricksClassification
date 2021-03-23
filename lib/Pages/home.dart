@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:first_flutter_app/Setup/MyImage.dart';
+import 'package:first_flutter_app/Setup/MyVideo.dart';
+import 'package:first_flutter_app/Setup/VideoPlayerScreen.dart';
+import 'package:first_flutter_app/Setup/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_flutter_app/authentication_services.dart';
@@ -13,7 +15,6 @@ import 'dart:async';
 
 class Home extends StatefulWidget {
   @override
-  //_HomeState createState() => _HomeState();
   createState() => FirestoreSlideshowState();
 
   final User credentials;
@@ -25,75 +26,77 @@ class FirestoreSlideshowState extends State<Home> {
   final PageController ctrl = PageController(viewportFraction: 0.8);
   final FirebaseFirestore db = FirebaseFirestore.instance;
   DocumentReference sightingRef =
-      FirebaseFirestore.instance.collection('images').doc();
+      FirebaseFirestore.instance.collection(STORAGE_FOLDER).doc();
 
-  List<File> _images = [];
-  List<MyImage> slides = [];
-  String activeTag = 'favorites';
+  List<File> _videos = [];
+  List<MyVideo> slides = [];
+  String activeTag = 'unlabeled';
 
   int currentPage = 0;
 
-  Future getImage(bool gallery) async {
-    ImagePicker picker = ImagePicker();
-    PickedFile pickedFile;
-    // Let user select photo from gallery
+  Future getVideo(bool gallery) async {
+    File pickedFile;
+    // Let user select video from gallery
     if (gallery) {
-      pickedFile = await picker.getImage(
+      pickedFile = await ImagePicker.pickVideo(
         source: ImageSource.gallery,
       );
     }
-    // Otherwise open camera to get new photo
+    // Otherwise open camera to get new video
     else {
-      pickedFile = await picker.getImage(
+      pickedFile = await ImagePicker.pickVideo(
         source: ImageSource.camera,
       );
     }
 
     setState(() {
       if (pickedFile != null) {
-        _images.add(File(pickedFile.path));
+        _videos.add(File(pickedFile.path));
       } else {
-        print('No image selected.');
+        print('No video selected.');
       }
     });
 
     if (pickedFile != null) {
-      await saveImages(_images, sightingRef);
+      await saveNewVideo(_videos.last);
     }
   }
 
-  Future<void> saveImages(List<File> _images, DocumentReference ref) async {
-     await uploadFile(_images.last);
+  Future<void> saveNewVideo(File video) async {
+    await uploadNewVideo(video);
   }
 
-  Future<String> uploadFile(File _image) async {
+  Future<String> uploadNewVideo(File video) async {
     Reference storageReference = FirebaseStorage.instance
         .ref()
-        .child('images/${_image.path.split('/').last}');
-    await storageReference.putFile(_image);
+        .child('$STORAGE_FOLDER/${video.path.split('/').last}');
+
+    await storageReference.putFile(
+        video, SettableMetadata(contentType: 'video/mp4'));
+
     print('File Uploaded');
-    String returnURL;
+    String returnedURL;
+
     await storageReference.getDownloadURL().then((fileURL) {
-      returnURL = fileURL;
-      db.collection('stories').add({
-        'title': 'alt titlu',
-        'img': returnURL,
-        'tags': ['favorites', 'cool']
+      returnedURL = fileURL;
+      db.collection(COLLECTION_NAME).add({
+        'url': returnedURL,
+        'uploadDate': Timestamp.now(),
+        'tags': [DEFAULT_LABEL, 'all'],
+        'labeled': false
       });
-      print('The returned url is: ${returnURL}');
+      print('The returned url is: $returnedURL');
     });
+
     _queryDb();
-    return returnURL;
+    return returnedURL;
   }
 
   @override
   void initState() {
-    print('init func');
     _queryDb();
-
     ctrl.addListener(() {
       int next = ctrl.page.round();
-
       if (currentPage != next) {
         setState(() {
           currentPage = next;
@@ -104,6 +107,8 @@ class FirestoreSlideshowState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    print('Build done with ${slides.length} slides');
+
     return PageView.builder(
       controller: ctrl,
       itemCount: slides.length + 1,
@@ -113,26 +118,27 @@ class FirestoreSlideshowState extends State<Home> {
           return _buildTagPage();
         } else if (slides.length >= currentIdx) {
           bool active = currentIdx == currentPage;
-          print(_images.toString());
+          print(_videos.toString());
           return _buildStoryPage(slides.elementAt(currentIdx - 1), active);
         }
       },
     );
   }
 
-  _queryDb({String tag = 'favorites'}) async {
+  _queryDb({String tag = 'unlabeled'}) async {
     slides.clear();
-    // Make a Query
-    Query query = db.collection('stories').where('tags', arrayContains: tag);
 
-    var snapshot = await db.collection("stories").get();
+    var snapshot = await db
+        .collection(COLLECTION_NAME)
+        .where('tags', arrayContains: tag)
+        .get();
+
     for (var s in snapshot.docs) {
-      print("title in query: ${s['title']}");
-      var image = new MyImage(s['img'], s['title']);
-      print(image);
-      slides.add(image);
+      var video = new MyVideo(s['url'], s['uploadDate'], s['labeled']);
+      print('video from query for: $video');
+      slides.add(video);
     }
-    //slides = query.snapshots().map((list) => list.docs.map((doc) => doc.data));
+
     print('slides: ${slides.toString()}');
 
     // Update the active tag
@@ -152,9 +158,12 @@ class FirestoreSlideshowState extends State<Home> {
               style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Colors.pink,
+                  color: bone,
                   decoration: TextDecoration.none)),
           RaisedButton(
+            padding: EdgeInsets.all(20),
+            shape: CircleBorder(),
+            color: coolGrey,
             onPressed: () {
               context.read<AuthenticationService>().signOut();
             },
@@ -163,8 +172,9 @@ class FirestoreSlideshowState extends State<Home> {
         ]),
         // ignore: deprecated_member_use
         Text(
-          'Your PHOTOS',
+          'Swipe left to see the tricks',
           style: TextStyle(
+              color: brickRed,
               fontSize: 25,
               fontWeight: FontWeight.bold,
               decoration: TextDecoration.none),
@@ -172,34 +182,36 @@ class FirestoreSlideshowState extends State<Home> {
         Text('FILTER by tag:',
             style: TextStyle(
                 fontSize: 25,
-                color: Colors.pink,
+                color: brickRed,
                 decoration: TextDecoration.none)),
-        _buildButton('favorites'),
-        _buildButton('happy'),
-        _buildButton('sad'),
+        _buildButton('unlabeled'),
+        _buildButton('all'),
+        _buildButton('ollie'),
+        _buildButton('slide'),
+        _buildButton('fail'),
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           RawMaterialButton(
-            fillColor: Theme.of(context).accentColor,
+            fillColor: coolGrey,
             child: Icon(
               Icons.add_photo_alternate_rounded,
-              color: Colors.white,
+              color: dutchWhite,
             ),
             elevation: 8,
             onPressed: () {
-              getImage(true);
+              getVideo(true);
             },
             padding: EdgeInsets.all(20),
             shape: CircleBorder(),
           ),
           RawMaterialButton(
-            fillColor: Theme.of(context).accentColor,
+            fillColor: coolGrey,
             child: Icon(
               Icons.add_a_photo,
-              color: Colors.white,
+              color: dutchWhite,
             ),
             elevation: 8,
             onPressed: () {
-              getImage(false);
+              getVideo(false);
             },
             padding: EdgeInsets.all(20),
             shape: CircleBorder(),
@@ -210,36 +222,60 @@ class FirestoreSlideshowState extends State<Home> {
   }
 
   _buildButton(tag) {
-    Color color = tag == activeTag ? Colors.purple : Colors.white;
+    Color color = tag == activeTag ? brickRed : bone;
     return FlatButton(
         color: color,
         child: Text('#$tag'),
         onPressed: () => _queryDb(tag: tag));
   }
 
-  _buildStoryPage(MyImage data, bool active) {
+  _buildStoryPage(MyVideo data, bool active) {
     final double blur = active ? 30 : 0;
     final double offset = active ? 20 : 0;
-    final double top = active ? 100 : 200;
+    final double top = active ? 150 : 200;
+    final double bottom = active ? 150 : 50;
+    final double right = 30;
+    final double borderWidth = active ? 10.0 : 15.0;
+
+    final String day = data.uploadDate.toDate().day.toString();
+    final String month = data.uploadDate.toDate().month.toString();
+    final String year = data.uploadDate.toDate().year.toString();
+    final String hour = data.uploadDate.toDate().hour < 10 ? '0' + data.uploadDate.toDate().hour.toString() : data.uploadDate.toDate().hour.toString();
+    final String minute = data.uploadDate.toDate().minute.toString();
+    final String labeled =
+        data.labeled ? 'been labled!' : 'has not been yet labeled :(';
 
     return AnimatedContainer(
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeOutQuint,
-        margin: EdgeInsets.only(top: top, bottom: 50, right: 30),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: NetworkImage(data.img),
-            ),
+            border: Border.all(
+                color: active ? coolGrey : brickRed,
+                width: borderWidth),
             boxShadow: [
               BoxShadow(
                   color: Colors.black87,
                   blurRadius: blur,
                   offset: Offset(offset, offset))
             ]),
-        child: Center(
-            child: Text(data.title,
-                style: TextStyle(fontSize: 40, color: Colors.white))));
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeOutQuint,
+        margin: EdgeInsets.only(top: top, bottom: bottom, right: right),
+        child: Column(children: [
+          Text('> This video has been uploaded on ' + day +'/' + month +'/'+year + ' at '+hour+':'+minute +'\n',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: brickRed,
+                  decoration: TextDecoration.none)),
+          Text('> This video has ' + labeled + '\n',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: brickRed,
+                  decoration: TextDecoration.none)),
+          Expanded(
+              child: VideoPlayerScreen(
+                  url: data.url, active: active ? true : false))
+        ]));
   }
 }

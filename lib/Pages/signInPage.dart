@@ -33,21 +33,6 @@ class SignInPage extends StatelessWidget {
               ButtonLogin(emailController, passwordController),
               FirstTime(),
             ])
-
-            /*TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password',
-            ),
-          ),
-          RaisedButton(onPressed: (){
-            context.read<AuthenticationService>().signIn(
-              email: emailController.text.trim(),
-              password: passwordController.text.trim()
-            );
-          },
-          child: Text('Sign in'),
-          )*/
           ],
         ),
       ),

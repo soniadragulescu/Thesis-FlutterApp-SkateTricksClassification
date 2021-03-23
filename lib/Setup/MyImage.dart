@@ -1,4 +1,3 @@
-
 class MyImage {
   String img;
   String title;
