@@ -1,3 +1,4 @@
+import 'package:first_flutter_app/core/showAlertDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:first_flutter_app/authentication_services.dart';
@@ -45,14 +46,19 @@ class _ButtonNewUserState extends State<ButtonNewUser> {
             ),
           ],
             color: Colors.white, borderRadius: BorderRadius.circular(30)),
-        child: FlatButton(
-          onPressed: (){
+        child: TextButton(
+          onPressed: () async {
             print('the email is ${this.emailController.text}');
-            context.read<AuthenticationService>().signUp(
+            var response = await context.read<AuthenticationService>().signUp(
                 email: this.emailController.text.trim(),
                 password: this.passwordController.text.trim()
             );
-            Navigator.pop(context);
+            print(response);
+            if(response != 'Signed up!'){
+              showAlertDialog(context, response);
+            }else{
+              Navigator.pop(context);
+            }
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -1,3 +1,4 @@
+import 'package:first_flutter_app/core/showAlertDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:first_flutter_app/authentication_services.dart';
@@ -46,13 +47,18 @@ class _ButtonLoginState extends State<ButtonLogin> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(30),
         ),
-        child: FlatButton(
-          onPressed: () {
+        child: TextButton(
+          onPressed: () async {
             print('the email is ${this.emailController.text}');
-            context.read<AuthenticationService>().signIn(
+            var response = await context.read<AuthenticationService>().signIn(
                 email: this.emailController.text.trim(),
                 password: this.passwordController.text.trim()
             );
+
+            if(response != 'Signed in!'){
+              showAlertDialog(context, response);
+            }
+
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

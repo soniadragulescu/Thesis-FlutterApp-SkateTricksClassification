@@ -26,7 +26,7 @@ class FirestoreSlideshowState extends State<Home> {
   final PageController ctrl = PageController(viewportFraction: 0.8);
   final FirebaseFirestore db = FirebaseFirestore.instance;
   DocumentReference sightingRef =
-      FirebaseFirestore.instance.collection(STORAGE_FOLDER).doc();
+  FirebaseFirestore.instance.collection(STORAGE_FOLDER).doc();
 
   List<File> _videos = [];
   List<MyVideo> slides = [];
@@ -69,7 +69,9 @@ class FirestoreSlideshowState extends State<Home> {
   Future<String> uploadNewVideo(File video) async {
     Reference storageReference = FirebaseStorage.instance
         .ref()
-        .child('$STORAGE_FOLDER/${video.path.split('/').last}');
+        .child('$STORAGE_FOLDER/${video.path
+        .split('/')
+        .last}');
 
     await storageReference.putFile(
         video, SettableMetadata(contentType: 'video/mp4'));
@@ -150,75 +152,84 @@ class FirestoreSlideshowState extends State<Home> {
   _buildTagPage() {
     return Container(
         child: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(children: [
-          Text('Hello, ${widget.credentials.email} !',
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+              ElevatedButton(
+                style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.all(20)),
+                    shape: MaterialStateProperty.all<CircleBorder>(
+                        CircleBorder()),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        coolGrey)),
+                onPressed: () {
+                  context.read<AuthenticationService>().signOut();
+                },
+                child: Text('Sign out'),
+              ),
+            ]),
+            Row(
+              children: [
+                Text('Hello, ${widget.credentials.email} !',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: bone,
+                    decoration: TextDecoration.none)),
+            ]),
+            // ignore: deprecated_member_use
+            Text(
+              'Swipe left to see the tricks',
               style: TextStyle(
-                  fontSize: 15,
+                  color: brickRed,
+                  fontSize: 25,
                   fontWeight: FontWeight.bold,
-                  color: bone,
-                  decoration: TextDecoration.none)),
-          RaisedButton(
-            padding: EdgeInsets.all(20),
-            shape: CircleBorder(),
-            color: coolGrey,
-            onPressed: () {
-              context.read<AuthenticationService>().signOut();
-            },
-            child: Text('Sign out'),
-          ),
-        ]),
-        // ignore: deprecated_member_use
-        Text(
-          'Swipe left to see the tricks',
-          style: TextStyle(
-              color: brickRed,
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.none),
-        ),
-        Text('FILTER by tag:',
-            style: TextStyle(
-                fontSize: 25,
-                color: brickRed,
-                decoration: TextDecoration.none)),
-        _buildButton('unlabeled'),
-        _buildButton('all'),
-        _buildButton('ollie'),
-        _buildButton('slide'),
-        _buildButton('fail'),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          RawMaterialButton(
-            fillColor: coolGrey,
-            child: Icon(
-              Icons.add_photo_alternate_rounded,
-              color: dutchWhite,
+                  decoration: TextDecoration.none),
             ),
-            elevation: 8,
-            onPressed: () {
-              getVideo(true);
-            },
-            padding: EdgeInsets.all(20),
-            shape: CircleBorder(),
-          ),
-          RawMaterialButton(
-            fillColor: coolGrey,
-            child: Icon(
-              Icons.add_a_photo,
-              color: dutchWhite,
-            ),
-            elevation: 8,
-            onPressed: () {
-              getVideo(false);
-            },
-            padding: EdgeInsets.all(20),
-            shape: CircleBorder(),
-          )
-        ]),
-      ],
-    ));
+            Text('FILTER by tag:',
+                style: TextStyle(
+                    fontSize: 25,
+                    color: brickRed,
+                    decoration: TextDecoration.none)),
+            _buildButton('unlabeled'),
+            _buildButton('all'),
+            _buildButton('ollie'),
+            _buildButton('slide'),
+            _buildButton('fail'),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              RawMaterialButton(
+                fillColor: coolGrey,
+                child: Icon(
+                  Icons.add_photo_alternate_rounded,
+                  color: dutchWhite,
+                ),
+                elevation: 8,
+                onPressed: () {
+                  getVideo(true);
+                },
+                padding: EdgeInsets.all(20),
+                shape: CircleBorder(),
+              ),
+              RawMaterialButton(
+                fillColor: coolGrey,
+                child: Icon(
+                  Icons.add_a_photo,
+                  color: dutchWhite,
+                ),
+                elevation: 8,
+                onPressed: () {
+                  getVideo(false);
+                },
+                padding: EdgeInsets.all(20),
+                shape: CircleBorder(),
+              )
+            ]),
+          ],
+        ));
   }
 
   _buildButton(tag) {
@@ -237,13 +248,33 @@ class FirestoreSlideshowState extends State<Home> {
     final double right = 30;
     final double borderWidth = active ? 10.0 : 15.0;
 
-    final String day = data.uploadDate.toDate().day.toString();
-    final String month = data.uploadDate.toDate().month.toString();
-    final String year = data.uploadDate.toDate().year.toString();
-    final String hour = data.uploadDate.toDate().hour < 10 ? '0' + data.uploadDate.toDate().hour.toString() : data.uploadDate.toDate().hour.toString();
-    final String minute = data.uploadDate.toDate().minute.toString();
+    final String day = data.uploadDate
+        .toDate()
+        .day
+        .toString();
+    final String month = data.uploadDate
+        .toDate()
+        .month
+        .toString();
+    final String year = data.uploadDate
+        .toDate()
+        .year
+        .toString();
+    final String hour = data.uploadDate
+        .toDate()
+        .hour < 10 ? '0' + data.uploadDate
+        .toDate()
+        .hour
+        .toString() : data.uploadDate
+        .toDate()
+        .hour
+        .toString();
+    final String minute = data.uploadDate
+        .toDate()
+        .minute
+        .toString();
     final String labeled =
-        data.labeled ? 'been labled!' : 'has not been yet labeled :(';
+    data.labeled ? 'been labled!' : 'has not been yet labeled :(';
 
     return AnimatedContainer(
         decoration: BoxDecoration(
@@ -261,7 +292,8 @@ class FirestoreSlideshowState extends State<Home> {
         curve: Curves.easeOutQuint,
         margin: EdgeInsets.only(top: top, bottom: bottom, right: right),
         child: Column(children: [
-          Text('> This video has been uploaded on ' + day +'/' + month +'/'+year + ' at '+hour+':'+minute +'\n',
+          Text('> This video has been uploaded on ' + day + '/' + month + '/' +
+              year + ' at ' + hour + ':' + minute + '\n',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
