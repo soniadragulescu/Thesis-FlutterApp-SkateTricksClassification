@@ -19,14 +19,16 @@ class UserOld extends StatelessWidget {
                 color: Colors.white70,
               ),
             ),
-            FlatButton(
-              padding: EdgeInsets.all(0),
+            TextButton(
+              style: ButtonStyle(
+                  padding:
+                      MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0))),
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SignInPage()));
               },
               child: Text(
-                'Sing in',
+                'Sign in',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white,
