@@ -36,7 +36,7 @@ class _ButtonNewUserState extends State<ButtonNewUser> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.blue[300],
+              color: Colors.blueGrey[200],
               blurRadius: 10.0, // has the effect of softening the shadow
               spreadRadius: 1.0, // has the effect of extending the shadow
               offset: Offset(

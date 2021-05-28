@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-showAlertDialog(BuildContext context, String e) {
+showAlertDialog(BuildContext context, String e, {String title = 'Something went wrong...'}) {
 
   // set up the button
   Widget okButton = TextButton(
@@ -13,7 +13,7 @@ showAlertDialog(BuildContext context, String e) {
 
   // set up the AlertDialog
   AlertDialog alert = AlertDialog(
-    title: Text("Something went wrong..."),
+    title: Text(title),
     content: Text(e),
     actions: [
       okButton,

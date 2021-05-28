@@ -1,3 +1,4 @@
+import 'package:first_flutter_app/Setup/constants.dart';
 import 'package:first_flutter_app/widget/buttonNewUser.dart';
 import 'package:first_flutter_app/widget/newEmail.dart';
 import 'package:first_flutter_app/widget/password.dart';
@@ -23,7 +24,7 @@ class _NewUserState extends State<NewUser> {
           gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Colors.blueGrey, Colors.lightBlueAccent]),
+              colors: [violet, lightGreen]),
         ),
         child: ListView(
           children: <Widget>[

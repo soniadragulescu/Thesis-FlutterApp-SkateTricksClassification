@@ -1,3 +1,4 @@
+import 'package:first_flutter_app/Setup/constants.dart';
 import 'package:first_flutter_app/core/showAlertDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,7 @@ class _ButtonLoginState extends State<ButtonLogin> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.blue[300],
+              color: Colors.blueGrey[200],
               blurRadius: 10.0, // has the effect of softening the shadow
               spreadRadius: 1.0, // has the effect of extending the shadow
               offset: Offset(
@@ -57,6 +58,8 @@ class _ButtonLoginState extends State<ButtonLogin> {
 
             if(response != 'Signed in!'){
               showAlertDialog(context, response);
+            }else{
+              await context.read<AuthenticationService>().subscribeTopic(TOPIC);
             }
 
           },

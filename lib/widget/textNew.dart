@@ -21,7 +21,7 @@ class _TextNewState extends State<TextNew> {
             ),
             Center(
               child: Text(
-                'We can start something new',
+                'Create an account so you can join SKATEGRAM',
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,

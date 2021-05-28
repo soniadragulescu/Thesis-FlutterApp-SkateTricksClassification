@@ -1,4 +1,5 @@
 import 'package:first_flutter_app/Pages/newuser.page.dart';
+import 'package:first_flutter_app/Setup/constants.dart';
 import 'package:flutter/material.dart';
 
 class FirstTime extends StatefulWidget {
@@ -21,11 +22,13 @@ class _FirstTimeState extends State<FirstTime> {
               'Your first time?',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white70,
+                color: bone,
               ),
             ),
-            FlatButton(
-              padding: EdgeInsets.all(0),
+            TextButton(
+              style: ButtonStyle(
+                  padding:
+                      MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0))),
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => NewUser()));

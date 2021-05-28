@@ -21,7 +21,7 @@ class _TextLoginState extends State<TextLogin> {
             ),
             Center(
               child: Text(
-                'A world of possibility in an app',
+                'Welcome to SKATEGRAM',
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,

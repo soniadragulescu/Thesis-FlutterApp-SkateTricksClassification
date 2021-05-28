@@ -16,7 +16,7 @@ class ImagesSlideshowState extends State<Home> {
   final PageController ctrl = PageController(viewportFraction: 0.8);
   final FirebaseFirestore db = FirebaseFirestore.instance;
   DocumentReference sightingRef =
-  FirebaseFirestore.instance.collection(STORAGE_FOLDER).doc();
+      FirebaseFirestore.instance.collection(STORAGE_FOLDER).doc();
 
   List<File> _images = [];
   List<MyImage> slides = [];
@@ -25,7 +25,6 @@ class ImagesSlideshowState extends State<Home> {
   int currentPage = 0;
 
   Future getImage(bool gallery) async {
-    ImagePicker picker = ImagePicker();
     File pickedFile;
     // Let user select photo from gallery
     if (gallery) {
@@ -116,7 +115,10 @@ class ImagesSlideshowState extends State<Home> {
     // Make a Query
     //Query query = db.collection('stories').where('tags', arrayContains: tag);
 
-    var snapshot = await db.collection(COLLECTION_NAME).where('tags', arrayContains: tag).get();
+    var snapshot = await db
+        .collection(COLLECTION_NAME)
+        .where('tags', arrayContains: tag)
+        .get();
     for (var s in snapshot.docs) {
       print("title in query: ${s['title']}");
       var image = new MyImage(s['img'], s['title']);
@@ -135,75 +137,76 @@ class ImagesSlideshowState extends State<Home> {
   _buildTagPage() {
     return Container(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Text('Hello, ${widget.credentials.email} !',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.pink,
-                      decoration: TextDecoration.none)),
-              RaisedButton(
-                onPressed: () {
-                  context.read<AuthenticationService>().signOut();
-                },
-                child: Text('Sign out'),
-              ),
-            ]),
-            // ignore: deprecated_member_use
-            Text(
-              'Your PHOTOS',
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          Text('Hello, ${widget.credentials.email} !',
               style: TextStyle(
-                  fontSize: 25,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none),
+                  color: Colors.pink,
+                  decoration: TextDecoration.none)),
+          ElevatedButton(
+            onPressed: () {
+              context.read<AuthenticationService>().signOut();
+            },
+            child: Text('Sign out'),
+          ),
+        ]),
+        // ignore: deprecated_member_use
+        Text(
+          'Your PHOTOS',
+          style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.none),
+        ),
+        Text('FILTER by tag:',
+            style: TextStyle(
+                fontSize: 25,
+                color: Colors.pink,
+                decoration: TextDecoration.none)),
+        _buildButton('favorites'),
+        _buildButton('happy'),
+        _buildButton('sad'),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          RawMaterialButton(
+            fillColor: Theme.of(context).accentColor,
+            child: Icon(
+              Icons.add_photo_alternate_rounded,
+              color: Colors.white,
             ),
-            Text('FILTER by tag:',
-                style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.pink,
-                    decoration: TextDecoration.none)),
-            _buildButton('favorites'),
-            _buildButton('happy'),
-            _buildButton('sad'),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              RawMaterialButton(
-                fillColor: Theme.of(context).accentColor,
-                child: Icon(
-                  Icons.add_photo_alternate_rounded,
-                  color: Colors.white,
-                ),
-                elevation: 8,
-                onPressed: () {
-                  getImage(true);
-                },
-                padding: EdgeInsets.all(20),
-                shape: CircleBorder(),
-              ),
-              RawMaterialButton(
-                fillColor: Theme.of(context).accentColor,
-                child: Icon(
-                  Icons.add_a_photo,
-                  color: Colors.white,
-                ),
-                elevation: 8,
-                onPressed: () {
-                  getImage(false);
-                },
-                padding: EdgeInsets.all(20),
-                shape: CircleBorder(),
-              )
-            ]),
-          ],
-        ));
+            elevation: 8,
+            onPressed: () {
+              getImage(true);
+            },
+            padding: EdgeInsets.all(20),
+            shape: CircleBorder(),
+          ),
+          RawMaterialButton(
+            fillColor: Theme.of(context).accentColor,
+            child: Icon(
+              Icons.add_a_photo,
+              color: Colors.white,
+            ),
+            elevation: 8,
+            onPressed: () {
+              getImage(false);
+            },
+            padding: EdgeInsets.all(20),
+            shape: CircleBorder(),
+          )
+        ]),
+      ],
+    ));
   }
 
   _buildButton(tag) {
     Color color = tag == activeTag ? Colors.purple : Colors.white;
-    return FlatButton(
-        color: color,
+    return TextButton(
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(color)),
         child: Text('#$tag'),
         onPressed: () => _queryDb(tag: tag));
   }
